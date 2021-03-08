@@ -1,0 +1,75 @@
+{
+    "variables": {
+      "wifi_name": "",
+      "wifi_password": "",
+      "home": "{{env `HOME`}}"
+    },
+    "builders": [{
+      "type": "arm-image",
+      "image_type": "raspberrypi",
+      "qemu_binary": "qemu-aarch64-static",
+      "iso_url" : "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2020-08-24/2020-08-20-raspios-buster-arm64.zip",
+      "iso_checksum":"sha256:6ce59adc2b432f4a6c0a8827041b472b837c4f165ab7751fdc35f2d1c3ac518c",
+      "last_partition_extra_size" : "1073741824",
+      "image_mounts": ["/boot","/"],
+      "chroot_mounts": [
+          ["proc", "proc", "/proc"],
+          ["sysfs", "sysfs", "/sys"],
+          ["bind", "/dev", "/dev"],
+          ["devpts", "devpts", "/dev/pts"],
+          ["binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"]
+      ]
+    }], 
+    "provisioners": [
+      {
+        "type": "shell",
+        "inline": ["touch /boot/ssh"]
+      },
+      {
+        "type": "shell",
+        "inline": [
+          "wpa_passphrase \"Eternius5\" \"elcaballodebonanza\" | sed -e 's/#.*$//' -e '/^$/d' >> /etc/wpa_supplicant/wpa_supplicant.conf"
+        ]
+      },
+      {
+        "type": "shell",
+        "inline": [
+          "apt-get update",
+          "apt purge xserver* lightdm* raspberrypi-ui-mods vlc* lxde* chromium* desktop* gnome* gstreamer* gtk* hicolor-icon-theme* lx* mesa* -y",
+          "apt autoremove -y",
+          "apt-get full-upgrade -y",
+          "curl -fsSL https://get.docker.com -o get-docker.sh",
+          "sh get-docker.sh",
+          "usermod -aG docker pi"
+        ]
+      },
+      {
+        "type": "shell",
+        "inline": [
+          "curl -sL https://install.raspap.com | bash -s -- --yes --openvpn 10 --adblock 0"
+        ]
+      },      {
+        "type": "file",
+        "source": "/build/exomy.tar.gz",
+        "destination": "/root/exomy.tar.gz"
+      },
+      {
+        "type": "file",
+        "source": "/build/run_exomy.sh",
+        "destination": "/root/run_exomy.sh"
+      },
+      {
+        "type": "file",
+        "source": "/build/exomy.service",
+        "destination": "/lib/systemd/system/exomy.service"
+      },
+      {
+        "type": "shell",
+        "inline": [
+          "chmod 755 /root/run_exomy.sh",
+          "chmod 644 /lib/systemd/system/exomy.service",
+          "cd /etc/systemd/system/multi-user.target.wants && ln -s /lib/systemd/system/exomy.service ."]
+      }
+    ]
+  }
+  

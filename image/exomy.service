@@ -1,0 +1,13 @@
+[Unit]
+Description=ExoMy
+After=network.target
+Before=rc-local.service
+
+[Service]
+WorkingDirectory=/root
+ExecStart=/root/run_exomy.sh
+Type=oneshot
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target
