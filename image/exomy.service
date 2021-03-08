@@ -2,6 +2,8 @@
 Description=ExoMy
 After=network.target
 Before=rc-local.service
+ConditionPathExists=/root/setup
+
 
 [Service]
 WorkingDirectory=/root

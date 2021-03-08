@@ -10,7 +10,7 @@ gzip -d exomy.tar.gz
 docker load < exomy.tar
 
 # Run docker container
-docker run \
+docker run -d \
     -p 8000:8000 \
     -p 8080:8080 \
     -p 9090:9090 \
@@ -18,3 +18,7 @@ docker run \
     --restart always \
     --name exomy \
     exomy
+
+rm /root/setup
+sleep 30s
+reboot
